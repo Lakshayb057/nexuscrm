@@ -68,6 +68,20 @@ const initializeAdminUser = async () => {
   }
 };
 
+// Root route
+app.get('/', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: '🚀 NexusCRM API is running successfully!',
+    status: 'active',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development',
+    documentation: process.env.NODE_ENV === 'production' 
+      ? 'https://your-docs-url.com' 
+      : 'http://localhost:5000/api-docs'
+  });
+});
+
 // API Routes
 const routes = [
   { path: '/api/auth', route: require('./routes/auth') },
