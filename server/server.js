@@ -68,18 +68,20 @@ const initializeAdminUser = async () => {
   }
 };
 
-// Root route
+// Debug middleware to log all requests
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
+  next();
+});
+
+// Simple test route
+app.get('/test', (req, res) => {
+  res.status(200).send('Test route is working!');
+});
+
+// Root route - must be defined before other route handlers
 app.get('/', (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: '🚀 NexusCRM API is running successfully!',
-    status: 'active',
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development',
-    documentation: process.env.NODE_ENV === 'production' 
-      ? 'https://your-docs-url.com' 
-      : 'http://localhost:5000/api-docs'
-  });
+  res.status(200).send('🚀 NexusCRM API is running successfully!');
 });
 
 // API Routes

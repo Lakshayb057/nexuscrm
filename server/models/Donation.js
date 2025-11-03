@@ -3,7 +3,6 @@ const mongoose = require('mongoose');
 const donationSchema = new mongoose.Schema({
   donorId: {
     type: String,
-    required: true,
     unique: true,
     index: true
   },
