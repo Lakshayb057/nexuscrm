@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
-import LoadingAnimation from '../components/LoadingAnimation';
 
 const Wrap = styled.div`
   position: relative;
@@ -93,15 +92,6 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 2000);
-    
-    return () => clearTimeout(timer);
-  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -114,34 +104,25 @@ const Login = () => {
 
   return (
     <Wrap>
-      <LoadingAnimation isLoading={isLoading} />
-      
-      {!isLoading && (
-        <>
-          {/* Animated background orbs */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6, ease: 'easeOut' }}
-            style={{ position: 'absolute', top: -120, left: -120, width: 280, height: 280, borderRadius: '50%', background: 'radial-gradient(circle at 30% 30%, rgba(99,102,241,.25), transparent 60%)', pointerEvents: 'none' }}
-          />
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, ease: 'easeOut', delay: .1 }}
-            style={{ position: 'absolute', bottom: -140, right: -140, width: 320, height: 320, borderRadius: '50%', background: 'radial-gradient(circle at 60% 60%, rgba(16,185,129,.22), transparent 60%)', pointerEvents: 'none' }}
-          />
+      {/* Animated background orbs */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.6, ease: 'easeOut' }}
+        style={{ position: 'absolute', top: -120, left: -120, width: 280, height: 280, borderRadius: '50%', background: 'radial-gradient(circle at 30% 30%, rgba(99,102,241,.25), transparent 60%)', pointerEvents: 'none' }}
+      />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.8, ease: 'easeOut', delay: .1 }}
+        style={{ position: 'absolute', bottom: -140, right: -140, width: 320, height: 320, borderRadius: '50%', background: 'radial-gradient(circle at 60% 60%, rgba(16,185,129,.22), transparent 60%)', pointerEvents: 'none' }}
+      />
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <Card
-              initial={{ y: 18, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ type: 'spring', stiffness: 160, damping: 18 }}
-            >
+      <Card
+        initial={{ y: 18, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ type: 'spring', stiffness: 160, damping: 18 }}
+      >
         <Title>
           <TitleBadge>
             <i className="fas fa-hand-holding-heart" />
@@ -175,10 +156,7 @@ const Login = () => {
             <Button type="submit" disabled={loading}>{loading ? 'Signing in...' : 'Sign In'}</Button>
           </div>
         </form>
-            </Card>
-          </motion.div>
-        </>
-      )}
+      </Card>
     </Wrap>
   );
 };
