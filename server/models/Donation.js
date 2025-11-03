@@ -98,16 +98,26 @@ donationSchema.index({ organization: 1, donationDate: -1 });
 
 donationSchema.index({ donor: 1, donationDate: -1 });
 
-// Pre-save hook to generate donorId if not provided
-donationSchema.pre('save', async function(next) {
+// Pre-validate hook to ensure donorId is set before validation
+donationSchema.pre('validate', function(next) {
   if (this.isNew && !this.donorId) {
+    const prefix = this.type === 'monthly' ? 'SSMD' : 'SSOTD';
+    // Generate a temporary ID that will be replaced in the pre-save hook
+    this.donorId = `${prefix}${Date.now().toString().slice(-7)}`;
+  }
+  next();
+});
+
+// Pre-save hook to generate final donorId
+donationSchema.pre('save', async function(next) {
+  if (this.isNew) {
     const Donation = this.constructor;
     const prefix = this.type === 'monthly' ? 'SSMD' : 'SSOTD';
     
     try {
       // Find the highest existing donorId for this type
       const lastDonation = await Donation.findOne(
-        { type: this.type, donorId: { $exists: true } },
+        { type: this.type, donorId: { $regex: `^${prefix}` } },
         { donorId: 1 },
         { sort: { donorId: -1 } }
       ).exec();
@@ -123,8 +133,7 @@ donationSchema.pre('save', async function(next) {
       this.donorId = `${prefix}${nextSequence.toString().padStart(7, '0')}`;
     } catch (error) {
       console.error('Error generating donorId:', error);
-      // Fallback to a simple timestamp-based ID if there's an error
-      this.donorId = `${prefix}${Date.now().toString().slice(-7)}`;
+      // Keep the temporary ID if there's an error
     }
   }
   next();
