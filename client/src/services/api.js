@@ -1,7 +1,8 @@
-import api from '../config/apiConfig';
+// Import the API instance from the config file
+import api, { API_BASE_URL } from '../config/apiConfig';
 
-// Export API endpoints as named exports
-export const authAPI = {
+// Define API endpoints
+const authAPI = {
   login: (credentials) => api.post('/auth/login', credentials),
   register: (userData) => api.post('/auth/register', userData),
   logout: () => api.get('/auth/logout'),
@@ -9,7 +10,7 @@ export const authAPI = {
   refreshToken: () => api.post('/auth/refresh')
 };
 
-export const paymentsAPI = {
+const paymentsAPI = {
   getPayments: (params) => api.get('/payments', { params }),
   getPayment: (id) => api.get(`/payments/${id}`),
   createPayment: (data) => api.post('/payments', data),
@@ -17,7 +18,7 @@ export const paymentsAPI = {
   deletePayment: (id) => api.delete(`/payments/${id}`)
 };
 
-export const campaignsAPI = {
+const campaignsAPI = {
   getCampaigns: (params) => api.get('/campaigns', { params }),
   getCampaign: (id) => api.get(`/campaigns/${id}`),
   createCampaign: (data) => api.post('/campaigns', data),
@@ -26,11 +27,10 @@ export const campaignsAPI = {
   exportCampaigns: (params) => api.get('/campaigns/export', {
     params,
     responseType: 'blob'
-  }),
+  })
 };
 
-
-export const contactsAPI = {
+const contactsAPI = {
   getContacts: (params) => api.get('/contacts', { params }),
   getContact: (id) => api.get(`/contacts/${id}`),
   createContact: (data) => api.post('/contacts', data),
