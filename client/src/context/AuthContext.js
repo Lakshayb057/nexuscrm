@@ -1,5 +1,13 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { authAPI, settingsAPI } from '../services/api';
+import api, { settingsAPI } from '../services/api';
+
+// Define authAPI functions using the imported api instance
+const authAPI = {
+  login: (credentials) => api.post('/auth/login', credentials),
+  register: (userData) => api.post('/auth/register', userData),
+  logout: () => api.get('/auth/logout'),
+  getMe: () => api.get('/auth/me')
+};
 
 const AuthContext = createContext();
 
