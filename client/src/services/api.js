@@ -1,117 +1,20 @@
-import axios from 'axios';
+import api from '../config/apiConfig';
 
-// Use environment variable or fallback to production API URL
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://nexuscrm.onrender.com/api';
-
-// Create and configure axios instance
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  withCredentials: true,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  timeout: 10000, // 10 seconds timeout
-});
-
-// Request interceptor for adding auth token
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
-// Response interceptor for handling common errors
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    // Handle common errors here (e.g., 401 Unauthorized)
-    if (error.response?.status === 401) {
-      // Handle unauthorized access (e.g., redirect to login)
-      localStorage.removeItem('token');
-      window.location.href = '/login';
-    }
-    return Promise.reject(error);
-  }
-);
-
-// Track if we're already handling a 401 to prevent loops
-let isRefreshing = false;
-let failedQueue = [];
-
-const processQueue = (error, token = null) => {
-  failedQueue.forEach(prom => {
-    if (error) {
-      prom.reject(error);
-    } else {
-      prom.resolve(token);
-    }
-  });
-  failedQueue = [];
-};
-
-api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    const originalRequest = error.config;
-    
-    // If error is not a 401, or if we've already tried to refresh the token
-    if (error.response?.status !== 401 || originalRequest._retry) {
-      return Promise.reject(error);
-    }
-
-    // If we're already refreshing the token, add the request to the queue
-    if (isRefreshing) {
-      return new Promise((resolve, reject) => {
-        failedQueue.push({ resolve, reject });
-      })
-      .then(token => {
-        originalRequest.headers['Authorization'] = 'Bearer ' + token;
-        return api(originalRequest);
-      })
-      .catch(err => {
-        return Promise.reject(err);
-      });
-    }
-
-    // Mark that we're refreshing the token
-    originalRequest._retry = true;
-    isRefreshing = true;
-
-    try {
-      // Clear the invalid token
-      localStorage.removeItem('token');
-      
-      // Redirect to login if we're not already there
-      if (window.location.pathname !== '/login') {
-        window.location.href = '/login';
-      }
-      
-      return Promise.reject(error);
-    } catch (refreshError) {
-      processQueue(refreshError, null);
-      return Promise.reject(refreshError);
-    } finally {
-      isRefreshing = false;
-    }
-  }
-);
-
+// Export API endpoints as named exports
 export const authAPI = {
   login: (credentials) => api.post('/auth/login', credentials),
   register: (userData) => api.post('/auth/register', userData),
   logout: () => api.get('/auth/logout'),
   getMe: () => api.get('/auth/me'),
+  refreshToken: () => api.post('/auth/refresh')
 };
 
 export const paymentsAPI = {
   getPayments: (params) => api.get('/payments', { params }),
+  getPayment: (id) => api.get(`/payments/${id}`),
+  createPayment: (data) => api.post('/payments', data),
+  updatePayment: (id, data) => api.put(`/payments/${id}`, data),
+  deletePayment: (id) => api.delete(`/payments/${id}`)
 };
 
 export const campaignsAPI = {

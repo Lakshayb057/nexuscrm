@@ -1,13 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import api, { settingsAPI } from '../services/api';
-
-// Define authAPI functions using the imported api instance
-const authAPI = {
-  login: (credentials) => api.post('/auth/login', credentials),
-  register: (userData) => api.post('/auth/register', userData),
-  logout: () => api.get('/auth/logout'),
-  getMe: () => api.get('/auth/me')
-};
+import { authAPI, settingsAPI } from '../services/api';
+import { useNavigate } from 'react-router-dom';
 
 const AuthContext = createContext();
 
