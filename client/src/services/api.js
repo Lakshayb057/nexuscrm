@@ -1,8 +1,13 @@
 import axios from 'axios';
 
+// Create and configure axios instance
 const API = axios.create({
-  baseURL: 'https://nexuscrm.onrender.com/api',
+  baseURL: process.env.REACT_APP_API_URL || 'https://nexuscrm.onrender.com/api',
   withCredentials: true,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  timeout: 10000, // 10 seconds timeout
 });
 
 // Request interceptor for adding auth token
