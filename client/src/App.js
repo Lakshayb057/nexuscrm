@@ -52,8 +52,9 @@ const AppContent = () => {
       <GlobalStyles />
       <Router>
         <Routes>
-          <Route path="/login" element={!user ? <Login /> : <Navigate to="/" />} />
-          <Route path="/" element={
+          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/login" element={!user ? <Login /> : <Navigate to="/dashboard" />} />
+          <Route path="/dashboard" element={
             <ProtectedRoute>
               <Layout />
             </ProtectedRoute>

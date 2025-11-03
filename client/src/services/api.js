@@ -1,17 +1,12 @@
 import axios from 'axios';
 
-// Create and configure axios instance
-const api = axios.create({
+const API = axios.create({
   baseURL: 'https://nexuscrm.onrender.com/api',
   withCredentials: true,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  timeout: 10000, // 10 seconds timeout
 });
 
 // Request interceptor for adding auth token
-api.interceptors.request.use(
+API.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
     if (token) {
@@ -25,7 +20,7 @@ api.interceptors.request.use(
 );
 
 // Response interceptor for handling common errors
-api.interceptors.response.use(
+API.interceptors.response.use(
   (response) => response,
   (error) => {
     // Handle common errors here (e.g., 401 Unauthorized)
@@ -40,19 +35,19 @@ api.interceptors.response.use(
 
 // Define API endpoints
 const authAPI = {
-  login: (credentials) => api.post('/auth/login', credentials),
-  register: (userData) => api.post('/auth/register', userData),
-  logout: () => api.get('/auth/logout'),
-  getMe: () => api.get('/auth/me'),
-  refreshToken: () => api.post('/auth/refresh')
+  login: (credentials) => API.post('/auth/login', credentials),
+  register: (userData) => API.post('/auth/register', userData),
+  logout: () => API.get('/auth/logout'),
+  getMe: () => API.get('/auth/me'),
+  refreshToken: () => API.post('/auth/refresh')
 };
 
 const paymentsAPI = {
-  getPayments: (params) => api.get('/payments', { params }),
-  getPayment: (id) => api.get(`/payments/${id}`),
-  createPayment: (data) => api.post('/payments', data),
-  updatePayment: (id, data) => api.put(`/payments/${id}`, data),
-  deletePayment: (id) => api.delete(`/payments/${id}`)
+  getPayments: (params) => API.get('/payments', { params }),
+  getPayment: (id) => API.get(`/payments/${id}`),
+  createPayment: (data) => API.post('/payments', data),
+  updatePayment: (id, data) => API.put(`/payments/${id}`, data),
+  deletePayment: (id) => API.delete(`/payments/${id}`)
 };
 
 const campaignsAPI = {

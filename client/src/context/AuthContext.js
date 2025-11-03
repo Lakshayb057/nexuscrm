@@ -1,6 +1,19 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { authAPI, settingsAPI } from '../services/api';
+import API from '../services/api';
 import { useNavigate } from 'react-router-dom';
+
+// Define API endpoints
+const authAPI = {
+  login: (credentials) => API.post('/auth/login', credentials),
+  register: (userData) => API.post('/auth/register', userData),
+  logout: () => API.get('/auth/logout'),
+  getMe: () => API.get('/auth/me'),
+  refreshToken: () => API.post('/auth/refresh')
+};
+
+const settingsAPI = {
+  // Add your settings API endpoints here
+};
 
 const AuthContext = createContext();
 
