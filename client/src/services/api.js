@@ -1,8 +1,8 @@
 import axios from 'axios';
 
 // Create and configure axios instance
-const API = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'https://nexuscrm.onrender.com/api',
+const api = axios.create({
+  baseURL: process.env.REACT_APP_API_URL || 'https://nexuscrm.onrender.com',
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
@@ -11,7 +11,7 @@ const API = axios.create({
 });
 
 // Request interceptor for adding auth token
-API.interceptors.request.use(
+api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
     if (token) {
@@ -25,7 +25,7 @@ API.interceptors.request.use(
 );
 
 // Response interceptor for handling common errors
-API.interceptors.response.use(
+api.interceptors.response.use(
   (response) => response,
   (error) => {
     // Handle common errors here (e.g., 401 Unauthorized)
@@ -40,19 +40,19 @@ API.interceptors.response.use(
 
 // Define API endpoints
 const authAPI = {
-  login: (credentials) => API.post('/auth/login', credentials),
-  register: (userData) => API.post('/auth/register', userData),
-  logout: () => API.get('/auth/logout'),
-  getMe: () => API.get('/auth/me'),
-  refreshToken: () => API.post('/auth/refresh')
+  login: (credentials) => api.post('/auth/login', credentials),
+  register: (userData) => api.post('/auth/register', userData),
+  logout: () => api.get('/auth/logout'),
+  getMe: () => api.get('/auth/me'),
+  refreshToken: () => api.post('/auth/refresh')
 };
 
 const paymentsAPI = {
-  getPayments: (params) => API.get('/payments', { params }),
-  getPayment: (id) => API.get(`/payments/${id}`),
-  createPayment: (data) => API.post('/payments', data),
-  updatePayment: (id, data) => API.put(`/payments/${id}`, data),
-  deletePayment: (id) => API.delete(`/payments/${id}`)
+  getPayments: (params) => api.get('/payments', { params }),
+  getPayment: (id) => api.get(`/payments/${id}`),
+  createPayment: (data) => api.post('/payments', data),
+  updatePayment: (id, data) => api.put(`/payments/${id}`, data),
+  deletePayment: (id) => api.delete(`/payments/${id}`)
 };
 
 const campaignsAPI = {

@@ -44,8 +44,12 @@ const AdminRoute = ({ children }) => {
 };
 
 const AppContent = () => {
-  const { user, theme } = useAuth();
+  const { user, theme, loading } = useAuth();
   const currentTheme = theme === 'light' ? lightTheme : darkTheme;
+
+  if (loading) {
+    return <div>Loading...</div>; // Or a loading spinner
+  }
 
   return (
     <ThemeProvider theme={currentTheme}>
@@ -53,7 +57,10 @@ const AppContent = () => {
       <Router>
         <Routes>
           <Route path="/" element={<Navigate to="/login" replace />} />
-          <Route path="/login" element={!user ? <Login /> : <Navigate to="/dashboard" />} />
+          <Route 
+            path="/login" 
+            element={!user ? <Login /> : <Navigate to="/dashboard" replace />} 
+          />
           <Route path="/dashboard" element={
             <ProtectedRoute>
               <Layout />
