@@ -163,6 +163,11 @@ export const reportsAPI = {
   exportReport: (id, params) =>
     api.get(`/reports/${id}/export`, { params, responseType: "blob" }),
 };
+export const settingsAPI = {
+  getSettings: () => api.get('/settings'),
+  updateSettings: (data) => api.put('/settings', data),
+  resetSettings: () => api.post('/settings/reset')
+};
 
 // Export the API instance and base URL
 export default api;
