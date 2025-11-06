@@ -14,6 +14,17 @@ const User = require('./models/User');
 // Create express app
 const app = express();
 
+// ✅ FIXED CORS SETUP (MUST BE BEFORE ROUTES)
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || "https://nexuscrm-client.vercel.app",
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  })
+);
+app.options("*", cors()); // ✅ Allow preflight for all routes
+
 // Security middleware
 app.use(helmet());
 app.use(express.json({ limit: '10kb' }));
@@ -23,17 +34,6 @@ app.use(mongoSanitize());
 app.use(xss());
 app.use(hpp());
 
-// Enable CORS
-app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? process.env.FRONTEND_URL 
-    : 'http://localhost:3000',
-  credentials: true,
-  optionsSuccessStatus: 200,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
-}));
-
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('MongoDB Connected'))
@@ -42,25 +42,22 @@ mongoose.connect(process.env.MONGODB_URI)
     process.exit(1);
   });
 
-// Initialize admin user
+// Initialize Admin User
 const initializeAdminUser = async () => {
   try {
     if (process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD) {
       const adminExists = await User.findOne({ email: process.env.ADMIN_EMAIL });
       if (!adminExists) {
-        const adminUser = new User({
+        await new User({
           firstName: 'Admin',
           lastName: 'User',
           email: process.env.ADMIN_EMAIL.toLowerCase(),
           password: process.env.ADMIN_PASSWORD,
           role: 'admin',
           forcePasswordChange: true
-        });
-        await adminUser.save();
+        }).save();
         console.log('Admin user created from environment variables');
       }
-    } else if (process.env.NODE_ENV !== 'production') {
-      console.warn('Admin credentials not set in environment variables. Run the setup script to create an admin user.');
     }
   } catch (error) {
     console.error('Error initializing admin user:', error);
@@ -68,25 +65,18 @@ const initializeAdminUser = async () => {
   }
 };
 
-// Debug middleware to log all requests
+// Debug request logger
 app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
   next();
 });
 
-// Simple test route
-app.get('/test', (req, res) => {
-  res.status(200).send('Test route is working!');
-});
-
-// Root route - must be defined before other route handlers
-app.get('/', (req, res) => {
-  res.status(200).send('🚀 NexusCRM API is running successfully!');
-});
+// ✅ Explicit auth route mount (as requested)
+const authRoutes = require("./routes/auth");
+app.use("/api/auth", authRoutes);
 
 // API Routes
 const routes = [
-  { path: '/api/auth', route: require('./routes/auth') },
   { path: '/api/contacts', route: require('./routes/contacts') },
   { path: '/api/organizations', route: require('./routes/organizations') },
   { path: '/api/agencies', route: require('./routes/agencies') },
@@ -102,87 +92,26 @@ const routes = [
   { path: '/api/settings', route: require('./routes/settings') },
 ];
 
-// Apply routes
-routes.forEach(({ path, route }) => {
-  app.use(path, route);
-});
+routes.forEach(({ path, route }) => app.use(path, route));
 
-// Health check endpoint
-app.get('/health', (req, res) => {
-  res.status(200).json({
-    status: 'ok',
-    message: 'NexusCRM API is running',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    nodeVersion: process.version,
-    environment: process.env.NODE_ENV || 'development'
-  });
-});
+// Root & health
+app.get('/', (req, res) => res.send('🚀 NexusCRM API is running successfully!'));
+app.get('/test', (req, res) => res.send('Test route working ✅'));
+app.get('/health', (req, res) => res.json({ status: "ok" }));
 
-// API documentation
-app.get('/api-docs', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'api-docs.html'));
-});
-
-// Handle 404
+// 404 handler
 app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    message: `Can't find ${req.originalUrl} on this server!`
-  });
+  res.status(404).json({ success: false, message: `Can't find ${req.originalUrl} on this server!` });
 });
 
-// Error handling middleware (must be after all other middleware and routes)
+// Error handler
 app.use(errorHandler);
 
 // Start server
 const PORT = process.env.PORT || 5000;
 const server = app.listen(PORT, async () => {
   console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
-  
-  try {
-    await initializeAdminUser();
-    
-    // Initialize journey scheduler if not in test environment
-    if (process.env.NODE_ENV !== 'test') {
-      try {
-        const { startJourneyScheduler } = require('./services/journeyScheduler');
-        await startJourneyScheduler();
-        console.log('Journey scheduler started');
-      } catch (err) {
-        console.warn('Could not start journey scheduler:', err.message);
-      }
-    }
-  } catch (error) {
-    console.error('Failed to initialize server:', error);
-    process.exit(1);
-  }
-});
-
-// Handle unhandled promise rejections
-process.on('unhandledRejection', (err) => {
-  console.error('UNHANDLED REJECTION! 💥 Shutting down...');
-  console.error(err.name, err.message);
-  server.close(() => {
-    process.exit(1);
-  });
-});
-
-// Handle uncaught exceptions
-process.on('uncaughtException', (err) => {
-  console.error('UNCAUGHT EXCEPTION! 💥 Shutting down...');
-  console.error(err.name, err.message);
-  server.close(() => {
-    process.exit(1);
-  });
-});
-
-// Handle SIGTERM
-process.on('SIGTERM', () => {
-  console.log('👋 SIGTERM RECEIVED. Shutting down gracefully');
-  server.close(() => {
-    console.log('💥 Process terminated!');
-  });
+  await initializeAdminUser();
 });
 
 module.exports = server;
