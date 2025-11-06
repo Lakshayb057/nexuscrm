@@ -23,19 +23,16 @@ const allowedOrigins = [
 
 app.use(
   cors({
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.some(o => o instanceof RegExp ? o.test(origin) : o === origin)) {
-        callback(null, true);
-      } else {
-        console.log("❌ CORS BLOCKED:", origin);
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    origin: [
+      "https://nexuscrm-client.vercel.app",
+      "https://nexuscrm-client-i645154b8-lakshayb057s-projects.vercel.app"
+    ],
+    methods: "GET,POST,PUT,DELETE",
+    allowedHeaders: "Content-Type,Authorization",
     credentials: true,
   })
 );
+
 
 app.options("*", cors()); // ✅ Enable preflight
 
