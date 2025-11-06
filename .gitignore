@@ -34,4 +34,4 @@ yarn-error.log*
 
 # OS generated files
 .DS_Store
-Thumbs.db
+Thumbs.db"client/build/" 
