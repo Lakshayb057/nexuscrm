@@ -21,17 +21,32 @@ const allowedOrigins = [
   /\.vercel\.app$/                                   // → ALL Vercel preview deployments (regex)
 ];
 
-app.use(
-  cors({
-    origin: [
-      "https://nexuscrm-client.vercel.app",
-      "https://nexuscrm-client-i645154b8-lakshayb057s-projects.vercel.app"
-    ],
-    methods: "GET,POST,PUT,DELETE",
-    allowedHeaders: "Content-Type,Authorization",
-    credentials: true,
-  })
-);
+// CORS configuration
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps, curl, etc.)
+    if (!origin) return callback(null, true);
+    
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'https://nexuscrm-client.vercel.app',
+      /https:\/\/nexuscrm-client-.*\.vercel\.app$/
+    ];
+    
+    if (allowedOrigins.some(regex => origin.match(regex))) {
+      callback(null, true);
+    } else {
+      console.log('CORS blocked for origin:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+};
+
+app.use(cors(corsOptions));
 
 
 app.options("*", cors()); // ✅ Enable preflight
@@ -82,10 +97,23 @@ app.use((req, res, next) => {
   next();
 });
 
-// Routes
+// API Routes
 app.use("/api/auth", require("./routes/auth"));
+app.use("/api/agencies", require("./routes/agencies"));
+app.use("/api/campaigns", require("./routes/campaigns"));
+app.use("/api/channels", require("./routes/channels"));
 app.use("/api/contacts", require("./routes/contacts"));
-// ... other routes
+app.use("/api/donations", require("./routes/donations"));
+app.use("/api/journeys", require("./routes/journeys"));
+app.use("/api/organizations", require("./routes/organizations"));
+app.use("/api/page-configs", require("./routes/pageConfigs"));
+app.use("/api/payments", require("./routes/payments"));
+app.use("/api/receipts", require("./routes/receipts"));
+app.use("/api/reports", require("./routes/reports"));
+app.use("/api/settings", require("./routes/settings"));
+app.use("/api/users", require("./routes/users"));
+
+// Health check endpoint
 app.get("/", (req, res) => res.send("🚀 NexusCRM API is running successfully!"));
 
 // 404 handler
