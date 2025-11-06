@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider as Provider } from './providers/QueryClientProvider';
 import { Toaster } from 'react-hot-toast';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
@@ -23,8 +23,6 @@ import MonthlyDonationNotification from './components/MonthlyDonationNotificatio
 import { GlobalStyles } from './styles/GlobalStyles';
 import { ThemeProvider } from 'styled-components';
 import { lightTheme, darkTheme } from './styles/theme';
-
-const queryClient = new QueryClient();
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -91,11 +89,11 @@ const AppContent = () => {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
+    <Provider>
       <AuthProvider>
         <AppContent />
       </AuthProvider>
-    </QueryClientProvider>
+    </Provider>
   );
 }
 

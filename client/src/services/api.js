@@ -1,8 +1,11 @@
 import axios from 'axios';
 
+// API base URL
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
 // Create and configure axios instance
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'https://nexuscrm.onrender.com',
+  baseURL: API_BASE_URL,
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
@@ -28,9 +31,7 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Handle common errors here (e.g., 401 Unauthorized)
     if (error.response?.status === 401) {
-      // Handle unauthorized access (e.g., redirect to login)
       localStorage.removeItem('token');
       window.location.href = '/login';
     }
@@ -38,8 +39,8 @@ api.interceptors.response.use(
   }
 );
 
-// Define API endpoints
-const authAPI = {
+// Define and export all API endpoints
+export const authAPI = {
   login: (credentials) => api.post('/auth/login', credentials),
   register: (userData) => api.post('/auth/register', userData),
   logout: () => api.get('/auth/logout'),
@@ -47,7 +48,7 @@ const authAPI = {
   refreshToken: () => api.post('/auth/refresh')
 };
 
-const paymentsAPI = {
+export const paymentsAPI = {
   getPayments: (params) => api.get('/payments', { params }),
   getPayment: (id) => api.get(`/payments/${id}`),
   createPayment: (data) => api.post('/payments', data),
@@ -55,7 +56,7 @@ const paymentsAPI = {
   deletePayment: (id) => api.delete(`/payments/${id}`)
 };
 
-const campaignsAPI = {
+export const campaignsAPI = {
   getCampaigns: (params) => api.get('/campaigns', { params }),
   getCampaign: (id) => api.get(`/campaigns/${id}`),
   createCampaign: (data) => api.post('/campaigns', data),
@@ -67,7 +68,7 @@ const campaignsAPI = {
   })
 };
 
-const contactsAPI = {
+export const contactsAPI = {
   getContacts: (params) => api.get('/contacts', { params }),
   getContact: (id) => api.get(`/contacts/${id}`),
   createContact: (data) => api.post('/contacts', data),
@@ -77,6 +78,11 @@ const contactsAPI = {
     params,
     responseType: 'blob'
   }),
+  bulkImport: (data) => api.post('/contacts/import', data, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
 };
 
 export const organizationsAPI = {
@@ -88,7 +94,7 @@ export const organizationsAPI = {
   exportOrganizations: (params) => api.get('/organizations/export', {
     params,
     responseType: 'blob'
-  }),
+  })
 };
 
 export const donationsAPI = {
@@ -102,7 +108,7 @@ export const donationsAPI = {
   exportDonations: (params) => api.get('/donations/export', { 
     params,
     responseType: 'blob' 
-  }),
+  })
 };
 
 export const usersAPI = {
@@ -110,7 +116,7 @@ export const usersAPI = {
   getUser: (id) => api.get(`/users/${id}`),
   createUser: (data) => api.post('/users', data),
   updateUser: (id, data) => api.put(`/users/${id}`, data),
-  deleteUser: (id) => api.delete(`/users/${id}`),
+  deleteUser: (id) => api.delete(`/users/${id}`)
 };
 
 export const agenciesAPI = {
@@ -122,7 +128,7 @@ export const agenciesAPI = {
   exportAgencies: (params) => api.get('/agencies/export', {
     params,
     responseType: 'blob'
-  }),
+  })
 };
 
 export const channelsAPI = {
@@ -134,7 +140,7 @@ export const channelsAPI = {
   exportChannels: (params) => api.get('/channels/export', {
     params,
     responseType: 'blob'
-  }),
+  })
 };
 
 export const receiptsAPI = {
@@ -143,7 +149,7 @@ export const receiptsAPI = {
   exportReceipts: (params) => api.get('/receipts/export', {
     params,
     responseType: 'blob'
-  }),
+  })
 };
 
 export const journeysAPI = {
@@ -154,7 +160,7 @@ export const journeysAPI = {
   deleteJourney: (id) => api.delete(`/journeys/${id}`),
   activateJourney: (id) => api.post(`/journeys/${id}/activate`),
   deactivateJourney: (id) => api.post(`/journeys/${id}/deactivate`),
-  enrollContacts: (id, data) => api.post(`/journeys/${id}/enroll`, data),
+  enrollContacts: (id, data) => api.post(`/journeys/${id}/enroll`, data)
 };
 
 export const reportsAPI = {
@@ -164,17 +170,15 @@ export const reportsAPI = {
   updateReport: (id, data) => api.put(`/reports/${id}`, data),
   deleteReport: (id) => api.delete(`/reports/${id}`),
   runReport: (id, overrides) => api.post(`/reports/${id}/run`, overrides || {}),
-  exportReport: (id, params) => api.get(`/reports/${id}/export`, { params, responseType: 'blob' }),
+  exportReport: (id, params) => api.get(`/reports/${id}/export`, { params, responseType: 'blob' })
 };
 
 export const settingsAPI = {
   getSettings: () => api.get('/settings'),
   updateSettings: (data) => api.put('/settings', data),
-  resetSettings: () => api.post('/settings/reset'),
+  resetSettings: () => api.post('/settings/reset')
 };
 
-// Export the API instance as default
+// Export the API instance and base URL
 export default api;
-
-// Export API base URL for other parts of the app
 export { API_BASE_URL };

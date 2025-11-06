@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { NavLink, useLocation } from 'react-router-dom';
 import { NavItem, SidebarContainer, SidebarHeader } from './Sidebar.styles';
 
 const Sidebar = ({ activeView, onViewChange, open }) => {
@@ -29,6 +30,13 @@ const Sidebar = ({ activeView, onViewChange, open }) => {
     return hasPermission(item.permission, 'read');
   });
 
+  // Get the current path to determine active item
+  const location = useLocation();
+  const getActiveView = (pathname) => {
+    const path = pathname.split('/').filter(Boolean);
+    return path[0] === 'dashboard' ? (path[1] || 'dashboard') : 'dashboard';
+  };
+
   return (
     <SidebarContainer open={open}>
       <SidebarHeader>
@@ -37,13 +45,15 @@ const Sidebar = ({ activeView, onViewChange, open }) => {
       {filteredMenuItems.map(item => (
         <NavItem
           key={item.id}
-          active={activeView === item.id}
+          as={NavLink}
+          to={item.id === 'dashboard' ? '/dashboard' : `/dashboard/${item.id}`}
+          className={getActiveView(location.pathname) === item.id ? 'active' : ''}
           onClick={() => onViewChange(item.id)}
         >
           <i className={item.icon}></i> <span>{item.label}</span>
         </NavItem>
       ))}
-      <NavItem onClick={() => onViewChange('logout')}>
+      <NavItem as="button" onClick={() => onViewChange('logout')}>
         <i className="fas fa-sign-out-alt"></i> <span>Logout</span>
       </NavItem>
     </SidebarContainer>

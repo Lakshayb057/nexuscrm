@@ -34,8 +34,21 @@ export const NavItem = styled.div`
   padding: 10px 12px;
   border-radius: 8px;
   cursor: pointer;
-  background: ${({ active, theme }) => (active ? theme.colors.primary + '22' : 'transparent')};
+  text-decoration: none;
   color: ${({ theme }) => theme.colors.text};
   margin-bottom: 6px;
-  &:hover { background: ${({ theme }) => theme.colors.primary + '18'}; }
+  transition: background-color 0.2s;
+  
+  &:hover { 
+    background: ${({ theme }) => theme.colors.primary + '18'}; 
+  }
+  
+  &.active {
+    background: ${({ theme }) => theme.colors.primary + '22'};
+    font-weight: 600;
+    
+    i {
+      color: ${({ theme }) => theme.colors.primary};
+    }
+  }
 `;

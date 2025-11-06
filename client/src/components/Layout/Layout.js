@@ -83,7 +83,8 @@ const Layout = () => {
       navigate('/login');
     } else {
       setActiveView(view);
-      navigate(view === 'dashboard' ? '/' : `/${view}`);
+      const path = view === 'dashboard' ? '/' : `/dashboard/${view}`;
+      navigate(path);
     }
     setSidebarOpen(false);
   };

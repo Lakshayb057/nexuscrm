@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useQuery, useMutation, useQueryClient } from 'react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { usersAPI, organizationsAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import styled from 'styled-components';
